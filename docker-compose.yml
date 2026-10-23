@@ -1,0 +1,111 @@
+# docker-compose.yml = runs the WHOLE of Truvira with one command:   docker compose up -d
+# It describes 4 containers ("services"), how they connect, and where data is kept.
+#
+#   browser -> web (Caddy) -> backend (Spring Boot) -> mysql
+#                                    \-> ai-service (Python)
+#
+# Passwords are NOT written here. ${NAME} values come from the .env file next to this one
+# (git-ignored; copy .env.example to .env and fill it in).
+#   ${NAME:-default}      = use the default if NAME is empty or missing
+#   ${NAME:?message}      = STOP with this message if NAME is missing (for required secrets)
+# Compose creates a private network automatically; services reach each other by NAME.
+
+services:
+
+  # ---------------------------------------------------------------- DATABASE
+  mysql:
+    # Official MySQL image, 8.4 = the Long-Term-Support version of MySQL 8.
+    image: mysql:8.4
+    restart: unless-stopped          # start again after a crash or a server reboot
+    environment:
+      # On the FIRST start, the official image creates this database + user automatically.
+      MYSQL_DATABASE: truvira
+      MYSQL_USER: truvira_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      TZ: ${TZ:-Asia/Kolkata}
+    volumes:
+      # The database files live in a VOLUME, so they survive container rebuilds.
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # "Is MySQL answering?" ($$ = a literal $, so the variable is read INSIDE the container.)
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # No "ports:" -> MySQL can NOT be reached from outside; only the backend talks to it.
+
+  # ---------------------------------------------------------------- AI DETECTOR
+  ai-service:
+    build: ./ai-service              # build from ai-service/Dockerfile
+    image: truvira-ai:latest
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Kolkata}
+    volumes:
+      # The 745 MB model is downloaded once into this volume (HF_HOME=/models in the Dockerfile).
+      - model-cache:/models
+    # Its HEALTHCHECK is defined in ai-service/Dockerfile. No ports: internal only.
+
+  # ---------------------------------------------------------------- BACKEND
+  backend:
+    build: ./backend                 # build from backend/Dockerfile (runs the 12 tests!)
+    image: truvira-backend:latest
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker # load application-docker.properties
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      # First admin password. Empty = a random one is printed ONCE in "docker compose logs backend".
+      TRUVIRA_ADMIN_PASSWORD: ${TRUVIRA_ADMIN_PASSWORD:-}
+      # The address people type in the browser (used for CORS; e.g. https://truvira.duckdns.org).
+      FRONTEND_ORIGIN: ${PUBLIC_URL:-http://localhost}
+      # Time zone: evidence timestamps (LocalDateTime.now()) use the container's clock.
+      # Without this the container would use UTC and timestamps would be 5.5 h off from local time.
+      TZ: ${TZ:-Asia/Kolkata}
+    volumes:
+      # Evidence images live in a VOLUME (later: S3). Never inside the container itself.
+      - uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy   # wait until MySQL ANSWERS, not just until it starts
+      ai-service:
+        condition: service_started   # don't wait for the model: uploads work without AI (UNAVAILABLE fallback)
+    healthcheck:
+      # "Is something listening on port 8080?" (bash can open a TCP connection itself; no curl needed)
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ---------------------------------------------------------------- WEB (front door)
+  web:
+    build: ./frontend                # build from frontend/Dockerfile (React build + Caddy)
+    image: truvira-web:latest
+    restart: unless-stopped
+    environment:
+      # ":80" = plain HTTP (local). On the server: the domain name, e.g. truvira.duckdns.org -> automatic HTTPS.
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      # THE ONLY published ports of the whole app.  "laptop/server port : container port"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"   # HTTP/3 (faster HTTPS over UDP)
+    volumes:
+      # Caddy keeps its HTTPS certificates here, so it doesn't request new ones on every restart.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
+# Named volumes = storage managed by Docker that survives "docker compose down" and rebuilds.
+# (Only "docker compose down -v" deletes them, so NEVER use -v on a server with real evidence.)
+volumes:
+  mysql-data:
+  uploads:
+  model-cache:
+    name: truvira-models             # reuse the volume we already filled with the model (no 745 MB re-download)
+  caddy-data:
+  caddy-config:

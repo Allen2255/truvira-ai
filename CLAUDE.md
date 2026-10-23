@@ -76,6 +76,19 @@ backend creates user `admin`. Its password = `truvira.admin.password` from appli
 otherwise a random one printed ONCE in the backend log ("Created first user 'admin' with generated password").
 Never put passwords in code or chat. The React app keeps the login in memory only (refresh = log in again).
 
+Docker (whole app, 4 containers: web/Caddy, backend, ai-service, mysql). Run inside WSL Ubuntu
+(`C:\Program Files\WSL\wsl.exe -d Ubuntu`), from the project folder:
+```
+cp .env.example .env      # first time: fill in DB_PASSWORD, MYSQL_ROOT_PASSWORD (.env is git-ignored)
+docker compose up -d --build
+docker compose ps         # all healthy; only "web" publishes ports (HTTP_PORT / HTTPS_PORT from .env)
+docker compose logs backend
+docker compose down       # NEVER "down -v" with real data: -v deletes the volumes (database + evidence)
+```
+Volumes: mysql-data, uploads, model-cache (name truvira-models), caddy-data, caddy-config.
+Local .env uses HTTP_PORT=8088 -> http://localhost:8088. Verified 2026-10-23: login, case, upload
+(hash matches), AI 0.9778, IST timestamps, and all data + image survive `down` + `up`.
+
 Tests (JUnit 5 + Mockito, no DB/AI needed):
 ```
 cd backend
