@@ -23,7 +23,9 @@ UNDERSTAND the technologies, not just to finish it.
 
 ## Repository
 
-GitHub (private): https://github.com/Allen2255/truvira-ai, branch `main`.
+GitHub (PUBLIC since 2026-10-23): https://github.com/Allen2255/truvira-ai, branch `main`.
+Anything committed is visible to everyone: check `git status` before every commit. README screenshots
+must come from demo data only (never real evidence, names or GPS).
 Never commit secrets, evidence images or logs: `.gitignore` excludes `application.properties`,
 `backend/uploads/`, `*.log`, `node_modules/`, `.venv/`, `target/`. Settings template:
 `backend/src/main/resources/application.example.properties`.
