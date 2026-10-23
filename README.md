@@ -94,7 +94,28 @@ AI model: [`haywoodsloan/ai-image-detector-deploy`](https://huggingface.co/haywo
 
 ---
 
-## Getting started (local)
+## Quick start with Docker (easiest)
+
+Needs only **Docker** (Docker Desktop on Windows/Mac, or Docker Engine on Linux).
+
+```bash
+git clone https://github.com/Allen2255/truvira-ai.git
+cd truvira-ai
+cp .env.example .env        # then open .env and set DB_PASSWORD and MYSQL_ROOT_PASSWORD
+docker compose up -d --build
+```
+Open **http://localhost** (or the `HTTP_PORT` you set in `.env`).
+
+- Log in as **`admin`**. The password is `TRUVIRA_ADMIN_PASSWORD` from `.env`, or, if you left it
+  empty, a random one shown once in `docker compose logs backend`.
+- The first start takes a while: images build, and the AI model (~745 MB) downloads in the background.
+  Until it is ready, uploads still work and show *"AI check not available"* with a **Retry** button.
+- Stop with `docker compose down`. Your data is kept in Docker volumes. (Never add `-v`: that deletes them.)
+
+Four containers start: **web** (Caddy, the only one with open ports), **backend**, **ai-service** and
+**mysql**, connected by a private Docker network.
+
+## Getting started (local, without Docker)
 
 ### Prerequisites
 Java 17+, Maven, Node.js 20+, MySQL 8, and (optional, for the AI check) Python 3.13.
@@ -223,7 +244,9 @@ truvira-ai/
 ├── backend/      Spring Boot (controller, service, repository, model, dto, report, security) + tests
 ├── frontend/     React app (src/api.js, src/App.jsx, src/components/)
 ├── ai-service/   Python FastAPI detector (app.py, requirements.txt)
-└── docs/         README screenshots
+├── docs/         README screenshots
+├── docker-compose.yml   all 4 containers, volumes, health checks
+└── .env.example         settings/password template for Docker (copy to .env)
 ```
 
 ---
@@ -239,7 +262,8 @@ truvira-ai/
 - Local setup uses HTTP; any online deployment **must use HTTPS** because login credentials travel with every request.
 
 ## Roadmap
-- Deployment with Docker Compose on AWS EC2, evidence storage in S3 (Object Lock), HTTPS via a free DuckDNS domain
+- ~~Docker Compose setup~~ ✅ done
+- Deployment on AWS EC2, evidence storage in S3 (Object Lock), HTTPS via a free DuckDNS domain
 - Swagger/OpenAPI docs, Spring Boot Actuator, scheduled re-checks of unavailable AI results
 - React Router pages and frontend tests
 
