@@ -1,0 +1,38 @@
+# Caddyfile = settings for Caddy, the web server at the FRONT DOOR of Truvira.
+# It does two jobs:
+#   1. /api/...      -> forwards ("reverse proxies") the request to the Spring Boot container
+#   2. everything else -> serves the built React files (index.html, JS, CSS)
+# Because the website and the API share ONE address, the browser needs no CORS.
+
+# SITE ADDRESS: {$SITE_ADDRESS::80} = use environment variable SITE_ADDRESS, default ":80".
+#   locally:     ":80"                  -> plain HTTP on port 80
+#   on a server: "truvira.duckdns.org"  -> Caddy gets and renews a free HTTPS certificate AUTOMATICALLY
+{$SITE_ADDRESS::80} {
+	# Compress responses (smaller downloads, faster page loads).
+	encode gzip
+
+	# Basic security headers sent with every response:
+	header {
+		# The browser must not "guess" file types (blocks some file-upload tricks).
+		X-Content-Type-Options nosniff
+		# Don't tell other websites which Truvira page you came from.
+		Referrer-Policy no-referrer
+		# Don't allow Truvira inside someone else's <iframe> (stops "clickjacking").
+		X-Frame-Options DENY
+		# Hide the server name/version (no free hints for attackers).
+		-Server
+	}
+
+	# 1. API requests go to the backend. "backend" is the container's NAME on Docker's network.
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	# 2. Everything else: the React files.
+	handle {
+		root * /srv
+		# React is a "single page app": if a path isn't a real file, send index.html and let React decide.
+		try_files {path} /index.html
+		file_server
+	}
+}

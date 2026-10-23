@@ -1,0 +1,9 @@
+# Files Docker must NOT copy into the frontend build.
+# node_modules is rebuilt INSIDE the container with "npm ci" (Linux versions, exact lock-file versions).
+node_modules/
+# dist is the build OUTPUT: the Dockerfile makes a fresh one.
+dist/
+*.log
+.idea/
+.env
+.env.*
