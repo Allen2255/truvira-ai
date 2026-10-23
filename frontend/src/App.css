@@ -157,7 +157,10 @@ dl + p { margin-top: 14px; } /* "+" = the paragraph right AFTER a list: give it 
 /* ---------- 7. CASES ---------- */
 .case-form { display: grid; gap: 10px; margin-bottom: 16px; }
 .case-form button { justify-self: start; }
-.case-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.case-list {
+  list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; max-height: 260px; overflow-y: auto;
+  grid-template-columns: minmax(0, 1fr); /* rows may shrink, so long titles get "..." instead of overflowing */
+}
 .case-list li {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer;
@@ -259,7 +262,9 @@ tbody tr.row-open { background: rgba(125, 211, 252, 0.09); box-shadow: inset 3px
 /* ---------- 13. SMALL SCREENS ----------
    A MEDIA QUERY: these rules apply only when the window is narrower than 860px (tablets, phones). */
 @media (max-width: 860px) {
-  .workspace, .detail-grid { grid-template-columns: 1fr; } /* one column: everything stacks */
+  /* One column: everything stacks. minmax(0, 1fr), not plain 1fr: plain 1fr may grow WIDER than the
+     screen when something inside won't shrink (a long title), which pushed cards off the edge on phones. */
+  .workspace, .detail-grid { grid-template-columns: minmax(0, 1fr); }
   .page { padding: 0 14px 48px; }
   .card { padding: 18px; }
   dl { grid-template-columns: 95px minmax(0, 1fr); }
