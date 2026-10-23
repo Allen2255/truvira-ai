@@ -21,6 +21,13 @@ UNDERSTAND the technologies, not just to finish it.
 - Be honest about uncertainty. The AI detector is the main technical risk; never promise
   perfect deepfake detection.
 
+## Repository
+
+GitHub (private): https://github.com/Allen2255/truvira-ai, branch `main`.
+Never commit secrets, evidence images or logs: `.gitignore` excludes `application.properties`,
+`backend/uploads/`, `*.log`, `node_modules/`, `.venv/`, `target/`. Settings template:
+`backend/src/main/resources/application.example.properties`.
+
 ## Architecture
 
 React (Vite, port 5173)  ->  Spring Boot REST API (port 8080)  ->  MySQL (port 3306)
