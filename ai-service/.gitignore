@@ -1,0 +1,3 @@
+# The virtual environment is ~1 GB and can be rebuilt from requirements.txt, so never commit it.
+.venv/
+__pycache__/

@@ -1,0 +1,266 @@
+/* CSS = how things LOOK. A selector (like .card) picks elements; the rules inside style them.
+   This file is organised top to bottom: colours -> basics -> layout -> each part of the page. */
+
+/* ---------- 1. COLOURS & SIZES ("design tokens") ----------
+   CSS variables: define once here, reuse everywhere with var(--name).
+   Changing one value here changes the whole site consistently. */
+:root {
+  --bg: #0b1120;           /* page background */
+  --panel: #131c2e;        /* cards */
+  --panel-2: #0f172a;      /* inputs, table header, inner boxes */
+  --border: #24324a;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #7dd3fc;       /* light blue: buttons, links, selected items */
+  --accent-strong: #38bdf8;
+  --good: #86efac;         /* green */
+  --warn: #fcd34d;         /* amber */
+  --danger: #f87171;       /* red */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --gap: 20px;
+}
+
+/* ---------- 2. BASICS ---------- */
+* { box-sizing: border-box; } /* width includes padding + border: makes sizes predictable */
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h2 { font-size: 1.15rem; margin: 0 0 12px; }
+h3 { font-size: 0.95rem; margin: 0 0 10px; color: var(--text); }
+p { margin: 0 0 10px; }
+
+.hint { color: var(--muted); font-size: 0.88rem; }
+.error { color: var(--danger); font-weight: 600; font-size: 0.9rem; }
+.notice {
+  background: rgba(134, 239, 172, 0.1); border: 1px solid rgba(134, 239, 172, 0.35);
+  color: var(--good); padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 600;
+}
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.82rem; }
+
+/* ---------- 3. FORM CONTROLS: one look for every input, select and textarea ---------- */
+/* input:not([type]) = an <input> with no type written, which the browser treats as text */
+input:not([type]), input[type="text"], input[type="password"], select, textarea {
+  width: 100%;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+}
+textarea { resize: vertical; }
+/* :focus = the box you're typing in. A visible ring helps keyboard users. */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.2);
+}
+label { display: grid; gap: 5px; color: var(--muted); font-size: 0.86rem; }
+
+/* Buttons: main (filled) and secondary (outline) */
+button {
+  background: var(--accent);
+  color: #06202e;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap; /* never wrap button text onto two lines */
+}
+button:hover:not(:disabled) { background: var(--accent-strong); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* .small = the outline style used for less important actions */
+button.small {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--border);
+  padding: 5px 11px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+button.small:hover:not(:disabled) { background: var(--panel-2); border-color: var(--accent); }
+
+/* ---------- 4. PAGE LAYOUT ---------- */
+.page { max-width: 1180px; margin: 0 auto; padding: 0 20px 64px; }
+
+/* Top bar: logo on the left, user on the right. Flexbox puts items in a row. */
+.header {
+  display: flex;
+  justify-content: space-between; /* push the two groups to opposite ends */
+  align-items: center;            /* line them up vertically */
+  gap: 12px;
+  flex-wrap: wrap;                /* on a phone, let the user area drop below */
+  padding: 18px 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: grid; place-items: center; /* centre the letter inside the square */
+  background: linear-gradient(135deg, var(--accent), #6366f1);
+  color: #06202e; font-weight: 800; font-size: 1.2rem;
+}
+.header h1 { margin: 0; font-size: 1.35rem; line-height: 1.2; }
+.tagline { margin: 0; color: var(--accent); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.3px; }
+.user-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 0.9rem; }
+.user-bar strong { color: var(--text); margin-right: 4px; }
+
+/* Two columns on wide screens: cases | upload.
+   CSS GRID: "minmax(0, 1fr)" = share the width equally and never overflow. */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start; /* each card only as tall as its content */
+}
+
+/* ---------- 5. CARDS ---------- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: var(--gap);
+}
+.workspace .card { margin-bottom: 0; } /* the grid gap already spaces them */
+.workspace { margin-bottom: var(--gap); }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+/* A thin line between sections inside a card */
+.section { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* Label/value lists (metadata, upload result): two neat columns */
+dl { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 7px 14px; margin: 0; }
+dt { color: var(--muted); font-size: 0.88rem; }
+dd { margin: 0; overflow-wrap: anywhere; /* long hashes break instead of overflowing */ }
+dl + p { margin-top: 14px; } /* "+" = the paragraph right AFTER a list: give it breathing room */
+
+/* ---------- 6. LOGIN ---------- */
+.auth-wrap { display: grid; place-items: center; min-height: 60vh; } /* centre the box on the page */
+.login { width: 100%; max-width: 400px; }
+.login form { display: grid; gap: 14px; }
+.login button[type="submit"] { width: 100%; padding: 11px; }
+.form-actions { display: flex; gap: 8px; align-items: center; }
+.form-actions button[type="submit"] { width: auto; }
+
+/* ---------- 7. CASES ---------- */
+.case-form { display: grid; gap: 10px; margin-bottom: 16px; }
+.case-form button { justify-self: start; }
+.case-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.case-list li {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid transparent;
+}
+.case-list li:hover { background: var(--panel-2); }
+.case-list li.active { background: var(--panel-2); border-color: var(--accent); }
+.case-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; color: var(--muted); font-size: 0.82rem; }
+.case-detail h3 { margin-bottom: 4px; }
+.case-actions { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.case-actions label { width: 180px; }
+
+/* ---------- 8. PILLS & BADGES (small coloured labels) ---------- */
+.badge, .pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;            /* fully rounded */
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+/* Case status: the class name comes from the data, e.g. badge-OPEN */
+.badge { color: #0b1120; }
+.badge-OPEN { background: var(--good); }
+.badge-UNDER_REVIEW { background: var(--warn); }
+.badge-CLOSED { background: var(--muted); }
+/* AI result + review pills: tinted background, coloured text */
+.pill-low  { background: rgba(134, 239, 172, 0.14); color: var(--good); }
+.pill-mid  { background: rgba(252, 211, 77, 0.14);  color: var(--warn); }
+.pill-high { background: rgba(248, 113, 113, 0.14); color: var(--danger); }
+.pill-neutral { background: rgba(148, 163, 184, 0.14); color: var(--muted); }
+.pill-review { background: rgba(125, 211, 252, 0.14); color: var(--accent); }
+
+/* ---------- 9. UPLOAD ---------- */
+/* The file input is hidden inside a big dashed "drop zone" label: clicking the label opens the picker. */
+.dropzone {
+  display: grid; place-items: center; gap: 4px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 22px 16px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  margin: 6px 0 14px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dropzone:hover { border-color: var(--accent); background: var(--panel-2); }
+.dropzone strong { color: var(--text); }
+.dropzone input { display: none; }
+.upload-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.preview {
+  display: block; width: 96px; height: 96px; object-fit: cover; /* crop to a neat square */
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+}
+
+/* ---------- 10. EVIDENCE TABLE ---------- */
+/* On narrow screens the table scrolls sideways INSIDE its box instead of breaking the page. */
+.table-wrap { overflow-x: auto; margin: 0 -6px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+th {
+  color: var(--muted); font-weight: 600; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: var(--panel-2); white-space: nowrap;
+}
+td { white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; color: var(--muted); } /* digits same width -> columns line up */
+td.file { max-width: 230px; overflow: hidden; text-overflow: ellipsis; } /* long names end with "..." */
+/* Buttons inside the table are as small as the pills, so every row has the same height */
+td button.small { padding: 1px 9px; font-size: 0.76rem; line-height: 1.6; }
+tbody tr { cursor: pointer; transition: background 0.1s; }
+tbody tr:hover { background: rgba(125, 211, 252, 0.05); }
+tbody tr.row-open { background: rgba(125, 211, 252, 0.09); box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---------- 11. EVIDENCE DETAIL PANEL ---------- */
+.detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+.detail-grid > div > :first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+/* AI result bar */
+.ai-bar { height: 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; margin: 8px 0 10px; }
+.ai-fill { height: 100%; border-radius: 999px; }
+.ai-fill-low { background: var(--good); }
+.ai-fill-mid { background: var(--warn); }
+.ai-fill-high { background: var(--danger); }
+.ai-low { color: var(--good); }
+.ai-mid { color: var(--warn); }
+.ai-high { color: var(--danger); }
+
+/* Review form */
+.review-form fieldset { border: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.review-form button[type="submit"] { justify-self: start; }
+
+/* ---------- 12. MEDIUM SCREENS: drop the least important table columns so the rest fit ---------- */
+@media (max-width: 1240px) { .col-hash { display: none; } }
+@media (max-width: 1060px) { .col-exif { display: none; } }
+
+/* ---------- 13. SMALL SCREENS ----------
+   A MEDIA QUERY: these rules apply only when the window is narrower than 860px (tablets, phones). */
+@media (max-width: 860px) {
+  .workspace, .detail-grid { grid-template-columns: 1fr; } /* one column: everything stacks */
+  .page { padding: 0 14px 48px; }
+  .card { padding: 18px; }
+  dl { grid-template-columns: 95px minmax(0, 1fr); }
+}

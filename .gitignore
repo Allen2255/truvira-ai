@@ -1,0 +1,37 @@
+# .gitignore = files and folders Git must NEVER save or upload.
+# One pattern per line. "folder/" = a whole folder; "*.log" = every file ending in .log.
+
+### SECRETS (never commit these) ###
+# The real settings file holds the MySQL password. GitHub gets application.example.properties instead.
+backend/src/main/resources/application.properties
+.env
+.env.*
+!.env.example
+
+### EVIDENCE (private data: images can contain GPS locations) ###
+backend/uploads/
+
+### LOGS ###
+*.log
+
+### BUILD OUTPUT (rebuilt automatically) ###
+backend/target/
+out/
+frontend/dist/
+
+### DOWNLOADED LIBRARIES (rebuilt from pom.xml / package.json / requirements.txt) ###
+node_modules/
+ai-service/.venv/
+__pycache__/
+*.pyc
+
+### IDE / OS files (personal to each computer) ###
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+### Leftovers from the IntelliJ "new project" template, not part of Truvira ###
+/src/
+/package-lock.json

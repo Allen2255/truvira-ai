@@ -1,0 +1,9 @@
+# requirements.txt = Python's version of pom.xml / package.json: the libraries this service needs.
+# Install with:  pip install -r requirements.txt
+fastapi==0.115.6          # web framework (like Spring Web): receives HTTP requests
+uvicorn[standard]==0.34.0 # web server that runs FastAPI (like Tomcat)
+python-multipart==0.0.20  # lets FastAPI read file uploads (multipart/form-data)
+pillow==11.1.0            # opens image files
+transformers==4.48.0      # downloads and runs pretrained models from Hugging Face
+# PyTorch (the engine that does the model's maths) is installed separately, CPU-only version:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
