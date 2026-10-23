@@ -1,0 +1,7 @@
+# Files Docker must NOT copy into the AI-service image.
+# .venv is ~800 MB of WINDOWS Python libraries: useless inside a Linux container (the Dockerfile
+# installs its own Linux versions from requirements.txt).
+.venv/
+__pycache__/
+*.pyc
+*.log
