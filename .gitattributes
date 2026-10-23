@@ -1,0 +1,11 @@
+# .gitattributes = per-file rules for Git.
+# Windows ends lines with CRLF, Linux with LF. Files that are used INSIDE Linux containers must keep
+# LF endings, or shell scripts and config files can break with errors like "bad interpreter".
+* text=auto
+Dockerfile text eol=lf
+Caddyfile text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.dockerignore text eol=lf
+.env.example text eol=lf

@@ -1,0 +1,16 @@
+# .dockerignore = files Docker must NOT copy into the build (like .gitignore, but for images).
+# Smaller build context = faster builds; and secrets/evidence can never end up inside an image.
+
+# SECRET: the real settings file with the MySQL password (Docker uses application-docker.properties)
+src/main/resources/application.properties
+
+# EVIDENCE: never bake private images into an image
+uploads/
+
+# Build output: the Dockerfile builds its own fresh copy inside the container
+target/
+
+# Logs and IDE files
+*.log
+.idea/
+*.iml

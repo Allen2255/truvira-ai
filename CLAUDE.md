@@ -143,6 +143,11 @@ Change with env var `TRUVIRA_MODEL`. Spring reads `truvira.detector.url` (defaul
       uploadedBy/reviewedBy from the login, React Login screen; 9 unit tests (EvidenceServiceTest,
       CaseServiceTest) all passing. Verified 2026-10-23. Not done: user management UI, change password.
 - [ ] Deploy (needs HTTPS because of HTTP Basic; hosted MySQL; Python service hosting)
+      Plan: Docker Compose on AWS EC2 (~4 GB RAM), evidence images in S3, free DuckDNS domain + Caddy HTTPS.
+      Local Docker: Windows is 11 21H2 (build 22000) and the 24H2 upgrade fails ("couldn't update the system
+      reserved partition"), so Docker Desktop is NOT possible. Docker Engine runs inside WSL 2 Ubuntu instead
+      (WSL 3.0.3 at C:\Program Files\WSL\wsl.exe; the plain `wsl` command is the old inbox stub). Verified
+      `docker run hello-world` 2026-10-23.
 
 ## Forensics notes (for explanations)
 
